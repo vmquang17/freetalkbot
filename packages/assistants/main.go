@@ -16,16 +16,13 @@ func HandleAssistant(language string, sender string, message string) (common.Res
 		if err != nil {
 			return nil, err
 		}
-
-	case "rasa":
-		rasaHandler := Rasa{
-			MessageLanguage: language,
-			RasaLanguage:    os.Getenv("ASSISTANT_LANGUAGE"),
-		}
-		response, err = rasaHandler.Interact(sender, message)
+	case "openai":
+		openaiHandler := OpenAI{}
+		response, err = openaiHandler.Interact(sender, message)
 		if err != nil {
 			return nil, err
 		}
 	}
+
 	return response, nil
 }

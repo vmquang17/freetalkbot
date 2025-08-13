@@ -30,12 +30,12 @@ var prCmd = &cobra.Command{
 		}
 
 		switch os.Getenv("ASSISTANT_TOOL") {
-		case "rasa":
-			validateEnv([]string{"RASA_URL", "ASSISTANT_LANGUAGE", "CALLBACK_SERVER_URL", "RASA_ACTIONS_SERVER_URL"})
 		case "anthropic":
 			validateEnv([]string{"ANTHROPIC_TOKEN", "ANTHROPIC_URL"})
+		case "openai":
+			validateEnv([]string{"OPENAI_API_KEY", "OPENAI_URL"})
 		default:
-			fmt.Println("Invalid value for variable ASSISTANT_TOOL, valid values are rasa and anthropic")
+			fmt.Println("Invalid value for variable ASSISTANT_TOOL, valid values are rasa, anthropic and openai")
 			os.Exit(1)
 		}
 

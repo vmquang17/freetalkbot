@@ -19,8 +19,8 @@
 
 # Go workspace file
 go.work
-asterisk/container-config/
-pulse/
+# asterisk/container-config/
+# pulse/
 tmp
 *.wav
 *.db

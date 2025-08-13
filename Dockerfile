@@ -18,12 +18,8 @@ WORKDIR /app
 COPY go.mod .
 COPY go.sum .
 
-RUN go env -w GOCACHE=/go-cache
-RUN go env -w GOMODCACHE=/gomod-cache
-
 # Add the whatsapp-media-decrypt tool
-RUN --mount=type=cache,target=/gomod-cache \
-    go get github.com/ddz/whatsapp-media-decrypt && \
+RUN go get github.com/ddz/whatsapp-media-decrypt && \
     go install github.com/ddz/whatsapp-media-decrypt && \
     go mod download
 
@@ -31,8 +27,7 @@ RUN --mount=type=cache,target=/gomod-cache \
 COPY . .
 
 # Build the binary
-RUN --mount=type=cache,target=/gomod-cache --mount=type=cache,target=/go-cache \
-    go build -tags sqlite_omit_load_extension -o /freetalkbot main.go
+RUN go build -tags sqlite_omit_load_extension -o /freetalkbot main.go
 
 # From a minimal image to run the binary
 FROM alpine:latest

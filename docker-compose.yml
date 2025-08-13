@@ -9,7 +9,8 @@ services:
       - freetalkbot
     ports:
       - 6569:4569/udp
-      - 6050:5060/udp
+      - 5060:5060/udp
+      - 5060:5060/tcp
       - 10000-10099:10000-10099/udp
     cap_add:
       - sys_ptrace                          # Only here to help testing
@@ -17,40 +18,13 @@ services:
       - net_raw                             # Allow NFT, used by AutoBan
     environment:
       - SYSLOG_LEVEL=${SYSLOG_LEVEL-4}      # Logging
-      - HOSTNAME=asterisk.docker.localhost
+      # - HOSTNAME=asterisk                   # Use default hostname
     volumes:
-      - asterisk-conf:/srv                      # Persistent storage
-      - ./asterisk/container-config:/etc/asterisk
+      # - asterisk-conf:/srv                      # Persistent storage
+      - ./asterisk/container-config:/etc/asterisk:rw,delegated
       - ./pulse:/run/pulse:rshared          # Use host audio
-      - /etc/localtime:/etc/localtime:ro    # Use host timezone    
+      - /etc/localtime:/etc/localtime:ro    # Use host timezone
 
-  whisper_cpu:
-    image: fedirz/faster-whisper-server:latest-cpu
-    restart: unless-stopped
-    profiles:
-      - cpu
-    env_file:
-      - .env
-    ports:
-      - 8000:8000
-    networks: 
-      - freetalkbot
-    volumes:
-      - hugging_face_cache:/root/.cache/huggingface
-
-  whisper_gpu:
-    image: fedirz/faster-whisper-server:latest-cuda
-    restart: unless-stopped
-    profiles:
-      - gpu
-    env_file:
-      - .env
-    ports:
-      - 8000:8000
-    networks: 
-      - freetalkbot
-    volumes:
-      - hugging_face_cache:/root/.cache/huggingface
     
   gobot_voip:
     build:
@@ -66,66 +40,34 @@ services:
     volumes:
       - ./data:/app/data
 
-  gobot_whatsapp:
-    build:
-      context: .
-    platform: linux/amd64
-    networks: 
-      - freetalkbot
-    command: ["freetalkbot", "init", "-c", "whatsapp"]
-    ports:
-      - "443:443"
-      - "5034:5034"
-    env_file:
-      - .env
-    volumes:
-      - ./data:/app/data
+  # gobot_whatsapp:
+  #   build:
+  #     context: .
+  #   platform: linux/amd64
+  #   networks: 
+  #     - freetalkbot
+  #   command: ["freetalkbot", "init", "-c", "whatsapp"]
+  #   ports:
+  #     - "443:443"
+  #     - "5034:5034"
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./data:/app/data
 
-  rasa:
+  openai:
     build:
-      context: ./assistants/rasa
-    env_file:
-      - .env
-    volumes:
-      - ./assistants/rasa:/app
-    command: 
-      - run
-      - --enable-api 
-      - --cors 
-      - "*"
-    ports:
-      - "5005:5005"
-    networks:
-      - freetalkbot
-
-  rasa-actions-server:
-    image: khalosa/rasa-aarch64:3.5.2
-    env_file:
-      - .env
-    volumes:
-      - ./assistants/rasa:/app
-    command: 
-      - run 
-      - actions
-    ports:
-      - "5055:5055"
-    networks:
-      - freetalkbot
-
-  anthropic:
-    build:
-      context: ./assistants/anthropic
+      context: ./assistants/openai
     env_file:
       - .env
     ports:
-      - "8088:8088"
+      - "8089:8088"
     networks:
       - freetalkbot
 
 volumes:
   asterisk-conf:
   app_data:
-  hugging_face_cache:
 
 networks:
   freetalkbot:
